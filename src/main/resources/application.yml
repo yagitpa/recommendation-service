@@ -1,0 +1,81 @@
+spring:
+  application:
+    name: recommendation-service
+
+  datasource:
+    url: jdbc:h2:file:./transaction;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username:
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      read-only: false
+      maximum-pool-size: 5
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  sql:
+    init:
+      mode: never
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# CORS настройки для локальной разработки
+cors:
+  allowed-origins: "http://localhost:3000,http://localhost:8080"
+  allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowed-headers: "*"
+  allow-credentials: true
+  max-age: 3600
+
+logging:
+  level:
+    com.cw.starbank.recommendation_service: DEBUG
+    com.cw.starbank.recommendation_service.rule: DEBUG
+    com.cw.starbank.recommendation_service.service: INFO
+    com.cw.starbank.recommendation_service.controller: INFO
+    org.springframework.jdbc.core.JdbcTemplate: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    disable-swagger-default-url: true
+    doc-expansion: none
+    enabled: true
+
+# Настройка кэширования для производительности
+spring.cache:
+  type: simple
+  cache-names: products,users

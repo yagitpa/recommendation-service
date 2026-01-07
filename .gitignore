@@ -1,2 +1,4 @@
 /pom.xml
 /src/main/resources/application.properties
+/transaction.trace.db
+/transaction.mv.db
