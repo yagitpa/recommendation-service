@@ -33,10 +33,10 @@ class UserTransactionAggregatorTest {
     }
 
     @Test
-    void testAddTransaction_Withdrawal() {
+    void testAddTransaction_Withdraw() { // ИСПРАВЛЕНО: WITHDRAW вместо WITHDRAWAL
         // Подготовка и выполнение
-        aggregator.addTransaction("SAVING", "WITHDRAWAL", new BigDecimal("300"));
-        aggregator.addTransaction("SAVING", "WITHDRAWAL", new BigDecimal("200"));
+        aggregator.addTransaction("SAVING", "WITHDRAW", new BigDecimal("300")); // ИСПРАВЛЕНО: WITHDRAW
+        aggregator.addTransaction("SAVING", "WITHDRAW", new BigDecimal("200")); // ИСПРАВЛЕНО: WITHDRAW
 
         // Проверка
         assertTrue(aggregator.usesProductType("SAVING"));
@@ -49,7 +49,7 @@ class UserTransactionAggregatorTest {
     void testAddTransaction_MixedTypes() {
         // Подготовка и выполнение
         aggregator.addTransaction("DEBIT", "DEPOSIT", new BigDecimal("1000"));
-        aggregator.addTransaction("DEBIT", "WITHDRAWAL", new BigDecimal("300"));
+        aggregator.addTransaction("DEBIT", "WITHDRAW", new BigDecimal("300")); // ИСПРАВЛЕНО: WITHDRAW
         aggregator.addTransaction("INVEST", "DEPOSIT", new BigDecimal("500"));
 
         // Проверка DEBIT
@@ -102,5 +102,16 @@ class UserTransactionAggregatorTest {
         // Выполнение и проверка
         assertTrue(aggregator.getStats("DEBIT").hasTransactions());
         assertFalse(aggregator.getStats("SAVING").hasTransactions());
+    }
+
+    @Test
+    void testAddTransaction_UnknownType() {
+        // Подготовка и выполнение - добавление с неизвестным типом
+        aggregator.addTransaction("DEBIT", "UNKNOWN_TYPE", new BigDecimal("100"));
+
+        // Проверка: транзакция добавлена, но суммы не увеличились
+        assertEquals(1, aggregator.getStats("DEBIT").getTransactionCount());
+        assertEquals(BigDecimal.ZERO, aggregator.getDeposits("DEBIT"));
+        assertEquals(BigDecimal.ZERO, aggregator.getWithdrawals("DEBIT"));
     }
 }

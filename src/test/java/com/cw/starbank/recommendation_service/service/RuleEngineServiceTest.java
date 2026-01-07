@@ -96,7 +96,7 @@ class RuleEngineServiceTest {
     void testTopSavingRule_DebitWithdrawalsExceedDeposits_ShouldFail() {
         // Подготовка: траты DEBIT превышают пополнения
         aggregator.addTransaction(ProductConstants.PRODUCT_TYPE_DEBIT, "DEPOSIT", new BigDecimal("10000"));
-        aggregator.addTransaction(ProductConstants.PRODUCT_TYPE_DEBIT, "WITHDRAWAL", new BigDecimal("20000")); // > deposits
+        aggregator.addTransaction(ProductConstants.PRODUCT_TYPE_DEBIT, "WITHDRAW", new BigDecimal("20000")); // ИСПРАВЛЕНО: WITHDRAW
 
         // Выполнение
         List<ProductInfo> recommendations = ruleEngineService.checkAllRules(aggregator);

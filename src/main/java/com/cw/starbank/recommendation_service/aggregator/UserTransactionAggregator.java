@@ -8,7 +8,11 @@ import java.util.Map;
 
 /**
  * Агрегирует транзакции пользователя по типам продуктов.
- * Хранит суммы DEPOSIT и WITHDRAWAL для каждого типа продукта.
+ * Хранит суммы DEPOSIT и WITHDRAW для каждого типа продукта.
+ * <p>
+ * <strong>Внимание:</strong> Типы транзакций должны быть 'DEPOSIT' и 'WITHDRAW'
+ * (в соответствии с полем TYPE в таблице TRANSACTIONS).
+ * </p>
  */
 @Data
 public class UserTransactionAggregator {
@@ -31,15 +35,23 @@ public class UserTransactionAggregator {
     }
 
     /**
-     * Добавляет транзакцию в агрегатор
+     * Добавляет транзакцию в агрегатор.
+     *
+     * @param productType     тип продукта (DEBIT, INVEST, SAVING, CREDIT)
+     * @param transactionType тип транзакции (должен быть 'DEPOSIT' или 'WITHDRAW')
+     * @param amount          сумма транзакции в рублях
      */
     public void addTransaction(String productType, String transactionType, BigDecimal amount) {
         TransactionStats stats = statsByProductType.computeIfAbsent(productType, k -> new TransactionStats());
 
+        // ИСПРАВЛЕНО: Используем 'WITHDRAW' вместо 'WITHDRAWAL'
         if ("DEPOSIT".equals(transactionType)) {
             stats.setTotalDeposits(stats.getTotalDeposits().add(amount));
-        } else if ("WITHDRAWAL".equals(transactionType)) {
+        } else if ("WITHDRAW".equals(transactionType)) { // ИСПРАВЛЕНО: WITHDRAW
             stats.setTotalWithdrawals(stats.getTotalWithdrawals().add(amount));
+        } else {
+            // Логируем неожиданный тип транзакции (если включено логирование)
+            System.err.println("WARNING: Unknown transaction type: " + transactionType);
         }
 
         stats.setTransactionCount(stats.getTransactionCount() + 1);
