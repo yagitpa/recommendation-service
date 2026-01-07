@@ -75,14 +75,51 @@ public class RecommendationService {
 
     /**
      * Конвертирует ProductInfo в ProductRecommendation.
-     * Метод имеет package-private доступ для тестирования.
+     * <p>
+     * Преобразует внутренний формат хранения информации о продукте в формат,
+     * требуемый для ответа API согласно техническому заданию.
+     * </p>
+     *
+     * <h3>Сопоставление полей:</h3>
+     * <ul>
+     *   <li>ProductInfo.name → ProductRecommendation.name</li>
+     *   <li>ProductInfo.id → ProductRecommendation.id</li>
+     *   <li>ProductInfo.description → ProductRecommendation.text</li>
+     * </ul>
+     *
+     * @param productInfo информация о продукте из базы данных
+     * @return объект ProductRecommendation для ответа API
+     * @throws IllegalArgumentException если productInfo равен null
      */
     RecommendationDTO.ProductRecommendation convertToRecommendation(ProductInfo productInfo) {
+        if (productInfo == null) {
+            throw new IllegalArgumentException("ProductInfo cannot be null");
+        }
+
         return new RecommendationDTO.ProductRecommendation(
-                productInfo.getId(),
-                productInfo.getName(),
-                productInfo.getDescription()
+                productInfo.getName(),    // ДОБАВЛЕНО: исправлен порядок параметров
+                productInfo.getId(),      // первый параметр - name, затем id
+                productInfo.getDescription() // третий параметр - text (описание)
         );
+    }
+
+    /**
+     * Преобразует список продуктов в DTO ответа.
+     * <p>
+     * Создает объект RecommendationDTO с указанным идентификатором пользователя
+     * и списком рекомендаций, полученных из бизнес-правил.
+     * </p>
+     *
+     * @param userId идентификатор пользователя
+     * @param products список рекомендованных продуктов
+     * @return DTO ответа с рекомендациями
+     */
+    private RecommendationDTO convertToDTO(UUID userId, List<ProductInfo> products) {
+        List<RecommendationDTO.ProductRecommendation> recommendations = products.stream()
+                                                                                .map(this::convertToRecommendation)
+                                                                                .toList();
+
+        return new RecommendationDTO(userId, recommendations);
     }
 
     /**
