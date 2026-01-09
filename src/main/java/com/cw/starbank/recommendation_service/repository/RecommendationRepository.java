@@ -66,8 +66,13 @@ public class RecommendationRepository {
      */
     public boolean checkDatabaseConnection() {
         try {
-            jdbcTemplate.queryForObject("SELECT 1", Integer.class);
-            return true;
+            // Простой запрос, который точно работает
+            Integer result = jdbcTemplate.queryForObject(
+                    "SELECT 1",
+                    Integer.class
+            );
+            logger.debug("Database connection check: result = {}", result);
+            return result != null && result == 1;
         } catch (Exception e) {
             logger.error("Database connection check failed: {}", e.getMessage());
             return false;
@@ -114,11 +119,20 @@ public class RecommendationRepository {
                         String productType = rs.getString("product_type");
                         String transactionType = rs.getString("transaction_type");
 
+                        // Поле AMOUNT в базе INTEGER (копейки), преобразуем в BigDecimal
                         BigDecimal amountInKopecks = BigDecimal.valueOf(rs.getInt("amount"));
+
+                        // Конвертируем из копеек в рубли
                         BigDecimal amountInRubles = convertKopecksToRubles(amountInKopecks);
+
+                        // Важное замечание: База возвращает 'DEPOSIT' или 'WITHDRAW'
+                        // UserTransactionAggregator ожидает те же значения
+                        // Так что преобразование не требуется
+
                         logger.trace("Transaction - Product: {}, Type: {}, Kopecks: {}, Rubles: {}",
                                 productType, transactionType, amountInKopecks, amountInRubles);
 
+                        // Добавляем транзакцию в агрегатор
                         aggregator.addTransaction(productType, transactionType, amountInRubles);
                     },
                     userId
@@ -196,6 +210,16 @@ public class RecommendationRepository {
      * @param productId идентификатор продукта
      * @return Optional с информацией о продукте, если найден
      */
+    /**
+     * Получает информацию о продукте по его идентификатору.
+     * <p>
+     * <strong>Важно:</strong> В таблице PRODUCTS нет столбца DESCRIPTION,
+     * поэтому поле description будет установлено в null.
+     * </p>
+     *
+     * @param productId идентификатор продукта
+     * @return Optional с информацией о продукте, если найден
+     */
     public Optional<ProductInfo> getProductById(UUID productId) {
         try {
             ProductInfo product = jdbcTemplate.queryForObject(
@@ -222,12 +246,21 @@ public class RecommendationRepository {
      *
      * @return список всех продуктов
      */
+    /**
+     * Получает список всех продуктов из базы данных.
+     * <p>
+     * <strong>Важно:</strong> В таблице PRODUCTS нет столбца DESCRIPTION,
+     * поэтому поле description будет установлено в null.
+     * </p>
+     *
+     * @return список всех продуктов
+     */
     public List<ProductInfo> getAllProducts() {
         try {
-            // В SqlQueries нет запроса для получения всех продуктов
-            // Создаем временный запрос
-            String sql = "SELECT \"ID\", \"NAME\", \"TYPE\", \"DESCRIPTION\" FROM \"PRODUCTS\" ORDER BY \"NAME\"";
-            return jdbcTemplate.query(sql, new ProductInfoRowMapper());
+            return jdbcTemplate.query(
+                    SqlQueries.GET_ALL_PRODUCTS,
+                    new ProductInfoRowMapper()
+            );
         } catch (Exception e) {
             logger.error("Error getting all products: {}", e.getMessage());
             return List.of();
@@ -318,6 +351,9 @@ public class RecommendationRepository {
     /**
      * RowMapper для преобразования ResultSet в ProductInfo.
      */
+    /**
+     * RowMapper для преобразования ResultSet в ProductInfo.
+     */
     private static class ProductInfoRowMapper implements RowMapper<ProductInfo> {
         @Override
         public ProductInfo mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -326,13 +362,9 @@ public class RecommendationRepository {
             String name = rs.getString("NAME");
             String type = rs.getString("TYPE");
 
-            // Поле DESCRIPTION может отсутствовать в некоторых запросах
-            String description;
-            try {
-                description = rs.getString("DESCRIPTION");
-            } catch (SQLException e) {
-                description = null; // Если поля нет в ResultSet
-            }
+            // В таблице PRODUCTS нет столбца DESCRIPTION, поэтому устанавливаем null
+            // Описание продуктов берется из констант ProductConstants
+            String description = null;
 
             return new ProductInfo(id, name, type, description);
         }

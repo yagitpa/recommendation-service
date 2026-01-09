@@ -129,18 +129,27 @@ public class TzProductsController {
         result.append("   ID: ").append(ProductConstants.INVEST_500_ID).append("\n");
         result.append("   Name: ").append(ProductConstants.INVEST_500_NAME).append("\n");
         result.append("   Type: ").append(ProductConstants.INVEST_500_TYPE).append("\n");
+        result.append("   Description: ").append(ProductConstants.INVEST_500_DESCRIPTION.length() > 50
+                ? ProductConstants.INVEST_500_DESCRIPTION.substring(0, 50) + "..."
+                : ProductConstants.INVEST_500_DESCRIPTION).append("\n");
         result.append("   Description length: ").append(ProductConstants.INVEST_500_DESCRIPTION.length()).append(" chars\n\n");
 
         result.append("2. Top Saving:\n");
         result.append("   ID: ").append(ProductConstants.TOP_SAVING_ID).append("\n");
         result.append("   Name: ").append(ProductConstants.TOP_SAVING_NAME).append("\n");
         result.append("   Type: ").append(ProductConstants.TOP_SAVING_TYPE).append("\n");
+        result.append("   Description: ").append(ProductConstants.TOP_SAVING_DESCRIPTION.length() > 50
+                ? ProductConstants.TOP_SAVING_DESCRIPTION.substring(0, 50) + "..."
+                : ProductConstants.TOP_SAVING_DESCRIPTION).append("\n");
         result.append("   Description length: ").append(ProductConstants.TOP_SAVING_DESCRIPTION.length()).append(" chars\n\n");
 
         result.append("3. Простой кредит:\n");
         result.append("   ID: ").append(ProductConstants.SIMPLE_CREDIT_ID).append("\n");
         result.append("   Name: ").append(ProductConstants.SIMPLE_CREDIT_NAME).append("\n");
         result.append("   Type: ").append(ProductConstants.SIMPLE_CREDIT_TYPE).append("\n");
+        result.append("   Description: ").append(ProductConstants.SIMPLE_CREDIT_DESCRIPTION.length() > 50
+                ? ProductConstants.SIMPLE_CREDIT_DESCRIPTION.substring(0, 50) + "..."
+                : ProductConstants.SIMPLE_CREDIT_DESCRIPTION).append("\n");
         result.append("   Description length: ").append(ProductConstants.SIMPLE_CREDIT_DESCRIPTION.length()).append(" chars\n");
 
         return result.toString();
